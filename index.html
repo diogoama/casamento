@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2f2e2c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mesas A/D">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>Diogo & Alessia · Mesas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light dark;
+--bg:light-dark(#ffffff,#1b1a19);--hall:light-dark(#eeebe6,#161514);--floor:light-dark(#ffffff,#24221f);--ink:light-dark(#2e2d2b,#efebe6);--mute:light-dark(#6f6a64,#a8a29a);
+--line:light-dark(#e4ded6,#3a3733);--grid:light-dark(#efebe5,#2d2b28);--card:light-dark(#ffffff,#2b2926);--char:#2f2e2c;--rose:#e0507a;--gold:#c99a2e;--ok:#2f9e6a;--warn:#e08a1e;--bad:#d63c3c;--ao:#25a5a0;--ex:#a77bd9;--st:#8a8f98;
+--sb:env(safe-area-inset-bottom);--bn:0px}
+*{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 Nunito,system-ui,sans-serif;display:flex;flex-direction:column;height:100dvh;overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px 12px;min-height:40px}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--rose);outline-offset:1px}
+button.pri{background:var(--char);color:#fff;border-color:var(--char)}button.rose{background:var(--rose);color:#fff;border-color:var(--rose)}
+input,select,textarea{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:7px 10px;font-size:16px;min-height:40px}
+header{display:flex;align-items:center;gap:14px;padding:calc(8px + env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 8px max(16px,env(safe-area-inset-left));background:var(--char);color:#fff;flex:none}
+header img{width:48px;height:auto}
+header h1{margin:0;font:600 28px/1.05 "Cormorant Garamond",serif}
+header .sub{font-size:13px;opacity:.75}
+header .right{margin-left:auto;text-align:right}
+.days{font:600 24px/1 "Cormorant Garamond",serif}.days small{display:block;font:12px Nunito;opacity:.75}
+#sync{font-size:12px;opacity:.85;display:flex;gap:6px;align-items:center;justify-content:flex-end;margin-top:3px}#sync i{width:8px;height:8px;border-radius:50%;background:#888}
+#sync.ok i{background:#4cd18b}#sync.busy i{background:var(--warn)}#sync.off i{background:#999}
+nav.tabs{display:flex;gap:6px;padding:8px 16px;border-bottom:1px solid var(--line);flex:none}
+nav.tabs button{border-radius:20px}nav.tabs button[aria-selected=true]{background:var(--rose);color:#fff;border-color:var(--rose)}
+#stats{display:flex;gap:8px;padding:6px 16px;overflow-x:auto;flex:none;scrollbar-width:none;border-bottom:1px solid var(--line)}
+.pill{flex:none;border-radius:20px;padding:3px 11px;font-size:13px;font-weight:700;background:var(--hall);border:1px solid var(--line);white-space:nowrap}
+.pill.ok{color:var(--ok)}.pill.warn{color:var(--warn)}.pill.bad{color:var(--bad)}
+main{flex:1;min-height:0;position:relative}
+.view{display:none;height:100%;overflow:auto}.view.on{display:block}
+#plan.on{display:grid;grid-template-columns:260px minmax(0,1fr) 310px;grid-template-rows:minmax(0,1fr);overflow:hidden}
+#plan>*{min-height:0}
+main{overflow:hidden}
+#plan.noinsp{grid-template-columns:260px minmax(0,1fr)}#plan.noinsp #insp{display:none}
+aside{border-right:1px solid var(--line);overflow:auto;padding:12px;background:var(--bg)}
+#insp{border-left:1px solid var(--line);border-right:0}
+aside h3,.card h3{margin:12px 0 6px;font:700 13px Nunito;color:var(--mute)}
+.x{float:right;min-height:34px;padding:2px 10px;margin:-2px 0 0 6px}
+.chip{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:var(--card);border:1px solid var(--line);margin:5px 0;cursor:grab;font-size:15px;user-select:none;-webkit-user-select:none}
+.chip.sel{outline:3px solid var(--rose)}.chip .new{margin-left:auto;font-size:11px;font-weight:800;color:#fff;background:var(--rose);border-radius:8px;padding:1px 6px}
+.dot{width:13px;height:13px;border-radius:50%;flex:none;border:2px solid #0002;display:inline-block}
+.legend{display:flex;flex-wrap:wrap;gap:6px 10px;font-size:12px;color:var(--mute)}.legend span{display:flex;gap:5px;align-items:center}
+#hallwrap{position:relative;overflow:auto;background:var(--hall);touch-action:pan-x pan-y;overscroll-behavior:contain}
+.bar{position:sticky;left:0;top:0;z-index:6;display:flex;gap:4px;padding:8px;flex-wrap:wrap;background:color-mix(in srgb,var(--hall) 88%,transparent);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.bar button{flex:none;min-height:36px;padding:4px 10px;font-size:14px;white-space:nowrap}.bar .sep{width:1px;background:var(--line);margin:0 4px;flex:none}
+#hall{position:relative;transform-origin:0 0}
+#venue{position:absolute;background-color:var(--floor);border:6px solid var(--char);box-shadow:0 10px 30px #0002}
+.dim{position:absolute;font-size:18px;font-weight:800;color:var(--mute);white-space:nowrap}
+.tbl,.el{position:absolute;touch-action:none}
+.top{position:absolute;inset:0;display:grid;place-items:center;text-align:center;background:var(--card);border:2px solid #b9b2a8;box-shadow:0 4px 10px #00000018;cursor:move;padding:4px;overflow:hidden}
+.top>div{transform:rotate(var(--cr))}
+.tbl.round .top{border-radius:50%}.tbl.rect .top{border-radius:6px}
+.tbl.theo .top{border-style:dashed;background:transparent}
+.tbl.couple .top{background:var(--char);color:#fff;border-color:var(--gold)}
+.tbl.over .top{border-color:var(--bad);box-shadow:0 0 0 4px #d63c3c33}.tbl.under .top{border-color:var(--warn)}
+.tbl.full .top{border-color:var(--ok)}.tbl.active .top{outline:3px solid var(--rose);outline-offset:4px}
+.tbl.clash .top{border-color:var(--bad);border-style:double;border-width:5px}
+.tbl.space::after{content:"";position:absolute;inset:-26px;border:2px dashed var(--bad);border-radius:12px;pointer-events:none}
+.tbl.drop .top{background:light-dark(#fde7ee,#3d2530)}
+.tname{font-family:"Cormorant Garamond",serif;font-weight:700;line-height:1.05}.tcnt{font-size:11px;font-weight:800;color:var(--mute)}
+.tbl.couple .tcnt{color:#e9d9a8}.tbl.clash .tcnt{color:var(--bad)}
+.seat{position:absolute;width:32px;height:32px;margin:-16px 0 0 -16px;border-radius:50%;border:2px solid var(--line);background:var(--card);font-size:12px;font-weight:800;display:grid;place-items:center;color:#fff;transform:rotate(var(--cr));transition:transform .15s;cursor:pointer}
+.seat.f{border-color:#0003;box-shadow:0 2px 4px #0002}.seat:hover{transform:rotate(var(--cr)) scale(1.25);z-index:5}
+.seat.me{outline:3px solid var(--rose);outline-offset:2px;z-index:6}.seat.foe{box-shadow:0 0 0 4px var(--bad)}
+.seat.x{border:2px solid var(--bad);box-shadow:0 0 0 2px #d63c3c55}.seat.ph{background-image:repeating-linear-gradient(45deg,#fff5 0 3px,transparent 3px 6px)}
+.seat.ghost{outline:2px dashed var(--warn)}
+.el{display:grid;place-items:center;font-size:15px;font-weight:800;text-align:center;cursor:move;border-radius:4px;color:var(--ink)}
+.el span{transform:rotate(var(--cr));white-space:nowrap;padding:0 4px}
+.el.active{outline:3px solid var(--rose);outline-offset:3px}
+.el.staff{background:repeating-linear-gradient(45deg,light-dark(#e3e4e7,#34363a) 0 8px,light-dark(#d4d6da,#2c2e31) 8px 16px);border:2px solid var(--st)}
+.el.dance{background:repeating-conic-gradient(light-dark(#f3e7c8,#3a3221) 0 25%,light-dark(#fbf5e6,#2e281b) 0 50%) 0 0/50px 50px;border:2px solid var(--gold)}
+.el.bar{background:light-dark(#d8f0ee,#1f3534);border:2px solid var(--ao)}
+.el.stage{background:light-dark(#d9d6d2,#3a3733);border:2px solid var(--char)}
+.el.other{background:light-dark(#efe6fa,#30283b);border:2px solid var(--ex)}
+.el.door{background:var(--rose);color:#fff;border-radius:2px;overflow:visible}
+.el.door span{position:absolute;top:100%;margin-top:4px;color:var(--rose);background:var(--floor);border-radius:4px}
+#tip{position:fixed;pointer-events:none;z-index:50;background:var(--char);color:#fff;border-radius:10px;padding:8px 11px;font-size:13px;display:none;max-width:240px;box-shadow:0 8px 20px #0004}
+#tip b{font-size:14px;display:block}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0}
+.row label{font-size:13px;color:var(--mute);width:84px}
+.row input[type=number]{width:80px}.row input[type=range]{flex:1}
+.glist{list-style:none;margin:6px 0;padding:0}.glist li{display:flex;gap:7px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px}
+.glist li button{margin-left:auto;min-height:32px;padding:2px 9px}
+.warnbox{border-radius:10px;padding:8px 10px;font-size:13px;font-weight:700;margin:6px 0}
+.warnbox.bad{background:#d63c3c1a;color:var(--bad)}.warnbox.warn{background:#e08a1e1a;color:var(--warn)}.warnbox.ok{background:#2f9e6a1a;color:var(--ok)}
+.pad{padding:16px;display:grid;gap:14px;align-content:start;padding-bottom:calc(24px + var(--bn) + var(--sb))}
+.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.scroll{overflow-x:auto}
+table.g{border-collapse:collapse;width:100%;font-size:14px}
+table.g th{text-align:left;font-size:12px;color:var(--mute);padding:8px 6px;border-bottom:2px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:1}
+table.g td{padding:5px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.g td select,table.g td input{min-height:34px;padding:3px 6px;font-size:15px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.card{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--card)}
+.card h2{margin:0 0 8px;font:600 24px/1.1 "Cormorant Garamond",serif}
+.card p{margin:4px 0;color:var(--mute);font-size:14px}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.kpi div{background:var(--hall);border-radius:12px;padding:10px}.kpi b{display:block;font:700 28px/1 "Cormorant Garamond",serif}.kpi span{font-size:12px;color:var(--mute)}
+textarea.code{width:100%;min-height:220px;font:13px/1.4 ui-monospace,Menlo,monospace}
+.log{font-size:14px}.log h4{margin:12px 0 4px;font-size:13px;color:var(--mute)}.log ul{margin:0;padding-left:18px}.log li{margin:2px 0}
+#modal{position:fixed;inset:0;background:#0007;display:none;place-items:center;z-index:60;padding:16px}
+#modal .card{max-width:560px;width:100%;max-height:82dvh;overflow:auto}
+#toast{position:fixed;bottom:calc(18px + var(--bn) + var(--sb));left:50%;transform:translateX(-50%);z-index:70;display:flex;flex-direction:column;gap:8px;align-items:center;width:max-content;max-width:92vw}
+.t{background:var(--char);color:#fff;border-radius:12px;padding:10px 16px;font-weight:700;box-shadow:0 10px 24px #0005;animation:up .3s}
+.t b{color:var(--gold)}
+#selbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + var(--bn) + var(--sb));z-index:40;display:none;gap:10px;align-items:center;background:var(--rose);color:#fff;border-radius:14px;padding:8px 8px 8px 14px;font-weight:700;box-shadow:0 10px 24px #0004;max-width:94vw}
+#selbar button{background:#fff2;border-color:#fff6;color:#fff;min-height:34px}
+@keyframes up{from{transform:translateY(14px);opacity:0}}
+@media (prefers-reduced-motion:reduce){.t{animation:none}}
+.bnav{display:none}
+#login{position:fixed;inset:0;z-index:90;background:var(--char);color:#fff;display:none;place-items:center;padding:24px}
+#login form{width:min(360px,100%);display:grid;gap:10px;text-align:center}
+#login img{width:110px;margin:0 auto 8px}#login h1{font:600 34px/1 "Cormorant Garamond",serif;margin:0 0 10px}
+#login input{background:#ffffff14;border-color:#ffffff33;color:#fff}#login .err{color:#ff9b9b;font-size:14px;min-height:20px}
+#login button.link{background:none;border:0;color:#fff;opacity:.7;font-size:14px}
+#ver{font-size:12px;color:var(--mute);text-align:center;user-select:none;-webkit-user-select:none;padding:6px}
+@media(max-width:760px){
+  :root{--bn:62px}
+  header{gap:10px}header img{width:34px}header h1{font-size:21px}header .sub{display:none}.days{font-size:18px}
+  nav.tabs{display:none}
+  #plan.on{display:block}
+  #hallwrap{height:100%}
+  #tray,#insp{position:fixed;left:0;right:0;bottom:calc(var(--bn) + var(--sb));max-height:62dvh;z-index:30;border:0;border-radius:18px 18px 0 0;box-shadow:0 -10px 30px #0003;transform:translateY(120%);transition:transform .25s;display:block!important}
+  #tray.open{transform:none}#plan:not(.noinsp) #insp{transform:none}
+  .bar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .bnav{display:grid;grid-template-columns:repeat(4,1fr);flex:none;border-top:1px solid var(--line);background:var(--bg);padding-bottom:var(--sb);z-index:35}
+  .bnav button{border:0;border-radius:0;background:none;min-height:var(--bn);font-size:12px;font-weight:700;color:var(--mute);display:grid;place-items:center;gap:0;padding:6px 2px;position:relative}
+  .bnav button svg{width:22px;height:22px}
+  .bnav button[aria-selected=true]{color:var(--rose)}
+  .bnav .badge{position:absolute;top:4px;left:calc(50% + 6px);background:var(--rose);color:#fff;border-radius:9px;font-size:10px;padding:0 5px;line-height:16px}
+  #tip{display:none!important}
+  table.g thead{display:none}
+  table.g tr{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;padding:12px 0;border-bottom:1px solid var(--line)}
+  table.g td{border:0;padding:0;white-space:normal;display:grid;gap:2px}
+  table.g td::before{content:attr(data-l);font-size:11px;color:var(--mute);font-weight:700}
+  table.g td:first-child{grid-column:1/-1}table.g td:first-child input{width:100%!important;font-weight:700}
+  table.g td select,table.g td input[type=text],table.g td input:not([type]){width:100%}
+}
+</style>
+</head>
+<body>
+<div id="login"><form id="lf">
+  <img src="icons/logo.png" alt="A/D"><h1>Diogo &amp; Alessia</h1>
+  <input type="email" id="le" placeholder="Email" autocomplete="username" required>
+  <input type="password" id="lp" placeholder="Password" autocomplete="current-password" required>
+  <button class="rose" type="submit">Entrar</button>
+  <div class="err" id="lerr"></div>
+  <button class="link" type="button" id="lreset">Esqueci-me da password</button>
+</form></div>
+
+<header>
+  <img src="icons/logo.png" alt="A/D">
+  <div><h1 id="ttl">Diogo &amp; Alessia</h1><div class="sub" id="sub"></div></div>
+  <div class="right"><div class="days" id="days"></div><div id="sync" class="off"><i></i><span>local</span></div></div>
+</header>
+<nav class="tabs" role="tablist">
+  <button role="tab" data-v="plan" aria-selected="true">Plano de mesas</button>
+  <button role="tab" data-v="guests" aria-selected="false">Convidados &amp; RSVP</button>
+  <button role="tab" data-v="settings" aria-selected="false">Sala, regras &amp; dados</button>
+</nav>
+<div id="stats"></div>
+<main>
+<section class="view on" id="plan">
+  <aside id="tray">
+    <input id="q" placeholder="Procurar convidado…" style="width:100%">
+    <div class="row"><select id="fOrig" style="width:100%"><option value="">Todas as origens</option></select></div>
+    <div class="legend" id="legend"></div>
+    <h3 id="unH"></h3>
+    <div id="unseated"></div>
+    <h3 id="ghH"></h3>
+    <div id="ghosts" style="font-size:13px;color:var(--mute)"></div>
+  </aside>
+  <div id="hallwrap">
+    <div class="bar">
+      <button id="zOut" aria-label="Diminuir">−</button><button id="zIn" aria-label="Aumentar">+</button><button id="zFit">Ajustar</button><button id="help" aria-label="Como usar">?</button><span class="sep"></span>
+      <button data-addt="round">+ Redonda</button><button data-addt="rect">+ Retangular</button><button data-addt="staff">+ Mesa staff</button><span class="sep"></span>
+      <button data-adde="door">+ Porta</button><button data-adde="staff">+ Área staff</button><button data-adde="dance">+ Pista</button><button data-adde="bar">+ Bar/buffet</button><button data-adde="stage">+ Palco/DJ</button><button data-adde="other">+ Outro</button>
+    </div>
+    <div id="hall"></div>
+  </div>
+  <aside id="insp"></aside>
+</section>
+
+<section class="view" id="guests"><div class="pad">
+  <div class="kpi" id="gk"></div>
+  <div class="tools">
+    <input id="gq" placeholder="Procurar…">
+    <select id="gfO"><option value="">Origem: todas</option></select>
+    <select id="gfR"><option value="">RSVP: todos</option></select>
+    <select id="gfS"><option value="">Mesa: todas</option><option value="y">Com mesa</option><option value="n">Sem mesa</option></select>
+    <button class="rose" id="addG">+ Adicionar convidado</button>
+  </div>
+  <div class="scroll"><table class="g" id="gt"></table></div>
+</div></section>
+
+<section class="view" id="settings"><div class="pad">
+  <div class="cards">
+    <div class="card"><h2>Sala</h2><p>Medidas interiores do salão. Mesas, portas e zonas são desenhadas à escala.</p>
+      <div class="row"><label>Largura</label><input type="number" step="0.5" id="vW"> m</div>
+      <div class="row"><label>Comprimento</label><input type="number" step="0.5" id="vL"> m</div>
+      <div class="row"><label>Por lugar</label><input type="number" step="0.05" id="vS"> m de mesa por cadeira</div>
+      <div class="row"><label>Passagem</label><input type="number" step="0.1" id="vC"> m livres à frente das portas</div>
+      <p id="vInfo"></p><button class="pri" id="saveVenue">Guardar sala</button></div>
+    <div class="card"><h2>Regras das mesas</h2><p>Janela de lugares por tipo de mesa. Fora da janela aparece um aviso.</p>
+      <div class="row"><label>Redonda</label><input type="number" id="rMin"> a <input type="number" id="rMax"></div>
+      <div class="row"><label>Retangular</label><input type="number" id="qMin"> a <input type="number" id="qMax"></div>
+      <div class="row"><label>Staff</label><input type="number" id="sDef"> lugares por defeito</div>
+      <button class="pri" id="saveRules">Guardar regras</button></div>
+    <div class="card"><h2>Incompatibilidades</h2><p>Pessoas que nunca devem ficar na mesma mesa. Também podes adicionar tocando num lugar do plano.</p>
+      <div class="row"><input id="cA" list="gnames" placeholder="Pessoa 1" style="flex:1"></div>
+      <div class="row"><input id="cB" list="gnames" placeholder="Pessoa 2" style="flex:1"><button class="rose" id="cAdd">Adicionar</button></div>
+      <datalist id="gnames"></datalist>
+      <div class="row"><input type="checkbox" id="cBlk"> <span style="font-size:14px">Bloquear (desmarcado: só avisa)</span></div>
+      <ul class="glist" id="cList"></ul></div>
+    <div class="card"><h2>Histórico</h2><p>Últimas alterações feitas por vocês os dois.</p><div class="log" id="hist"></div></div>
+    <div class="card"><h2>Repor plano base</h2><p>Volta às mesas da folha "Best Distribuição de Mesas", reorganizadas dentro da sala. Convidados, RSVP, portas e zonas mantêm-se.</p>
+      <button class="rose" id="reset">Repor plano base</button></div>
+    <div class="card"><h2>Atualizar com o Excel</h2><p>Carrega o mesmo ficheiro. Quem saiu da "Lista de Convidados" sai do plano; quem entrou fica em "Por sentar" com a etiqueta novo.</p>
+      <input type="file" id="xl" accept=".xlsx,.xls"></div>
+    <div class="card"><h2>Exportar</h2><p>Para o espaço, a família ou só para guardar.</p>
+      <div class="tools"><button id="xOut">Excel (convidados + mesas)</button><button id="jOut">Cópia de segurança (.json)</button></div></div>
+    <div class="card" id="acct"><h2>Conta</h2><p id="who"></p><button id="logout">Terminar sessão</button></div>
+    <div class="card" id="adv" hidden><h2>Avançado · JSON</h2>
+      <p>Cola uma atualização em JSON (ou carrega um ficheiro) e pré-visualiza antes de aplicar. Tudo é sincronizado e fica no histórico.</p>
+      <div class="tools"><button id="aTpl">Ver modelo</button><button id="aExp">Exportar estado</button><label class="pill" style="cursor:pointer">Carregar .json<input type="file" id="aFile" accept=".json,application/json" hidden></label></div>
+      <textarea class="code" id="aTx" spellcheck="false" placeholder='{"guests":{"upsert":[{"name":"Novo Nome","origin":"Amigo(a) do Casal"}]}}'></textarea>
+      <div class="tools"><button class="pri" id="aPrev">Pré-visualizar e aplicar</button><button id="aUpd">Procurar atualização da app</button></div>
+      <p style="font-size:13px" id="aMsg"></p></div>
+  </div>
+  <div id="ver"></div>
+</div></section>
+</main>
+<nav class="bnav">
+  <button data-b="plan" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="3.5"/><circle cx="16.5" cy="15.5" r="3.5"/><path d="M3 21h4M14 4h7"/></svg>Plano</button>
+  <button data-b="tray"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M17 8h4M19 6v4"/></svg>Por sentar<span class="badge" id="bBadge"></span></button>
+  <button data-b="guests"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Convidados</button>
+  <button data-b="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>Definições</button>
+</nav>
+<div id="selbar"><span id="selTx"></span><button id="selX">Cancelar</button></div>
+<div id="tip"></div><div id="modal"><div class="card" id="mbody"></div></div><div id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+<script src="data.js"></script>
+<script type="module">
+import {firebaseConfig,WEDDING_ID} from './firebase-config.js';
+const APP_VERSION='1.0.1';
+const DEF_CFG={title:'Diogo & Alessia',subtitle:'4 setembro 2027 · Quinta dos Quinteiros',date:'2027-09-04',
+  origins:{'Família Noiva':'#e0507a','Família Noivo':'#3b7dd8','Amigo(a) da Noiva':'#f29bb5','Amigo(a) do Noivo':'#25a5a0','Amigo(a) do Casal':'#c99a2e'},
+  rsvp:['Confirmado','Ainda não sabe','Não vai'],ages:['Adulto','Criança - até 10 anos','Criança - de Colo'],holders:['Alessia','Diogo','Pais da noiva','Pais do noivo','Correio'],
+  names:{}};
+const ELT={door:['Porta',2,.25],staff:['Área staff',5,3],dance:['Pista de dança',8,5],bar:['Bar / buffet',4,1.5],stage:['Palco / DJ',4,2.5],other:['Zona',3,2]};
+const PX=50,OFF=1.5;
+const $=id=>document.getElementById(id);
+const norm=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[?()]/g,' ').replace(/\s+/g,' ').trim();
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const newId=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const mobile=()=>matchMedia('(max-width:760px)').matches;
+let S=null,sel=null,active=null,zoom=1,helpOff=true,store=null,booted=false;
+try{helpOff=localStorage.getItem('ad-help-off')==='1'||mobile()}catch(e){}
+const col=o=>S.config.origins[o]||(o==='Staff'?'#8a8f98':'#a77bd9');
+const NOT='Não vai';
+
+/* ================= data model ================= */
+function mkGuest(r,i){return{id:'g'+(i+1),ord:i,name:String(r[1]).trim(),origin:r[2]||'Extra',age:r[3]||'Adulto',invites:r[4]||0,std:r[5]||'',phys:!!r[6],dig:!!r[7],rsvp:r[8]||'',addr:r[9]||'',holder:'',diet:'',isNew:false}}
+function newGuest(o){return{id:newId('g'),ord:Date.now(),name:'Novo convidado',origin:'Amigo(a) do Casal',age:'Adulto',invites:0,std:'',phys:false,dig:false,rsvp:'',addr:'',holder:'',diet:'',isNew:true,...o}}
+function matchGuest(name,pool){const n=norm(name);let g=pool.find(x=>norm(x.name)===n);if(g)return g;
+  const t=n.split(' ');const c=pool.filter(x=>{const u=norm(x.name).split(' ');return u.every(w=>t.includes(w))||t.every(w=>u.includes(w))});return c.length===1?c[0]:null}
+function dims(t){const n=Math.max(t.cap,t.seats.length),sp=S.venue.seat;
+  if(t.couple)return{kind:'rect',len:1.6,wid:.8,n};
+  if(t.shape==='round')return{kind:'round',d:Math.max(1.5,n*sp/Math.PI),n};
+  return{kind:'rect',len:Math.max(1.2,Math.ceil(n/2)*sp+.2),wid:.9,n}}
+function geo(t){const d=dims(t),n=d.n,cd=.4*PX;
+  if(d.kind==='round'){const D=d.d*PX,R=D/2+cd;return{w:D,h:D,pts:Array.from({length:n},(_,i)=>{const a=i/n*2*Math.PI-Math.PI/2;return[D/2+R*Math.cos(a),D/2+R*Math.sin(a)]})}}
+  const W=d.len*PX,H=d.wid*PX,sp=S.venue.seat*PX;
+  if(t.couple)return{w:W,h:H,pts:[[W/2-sp/2,-cd],[W/2+sp/2,-cd]].slice(0,n)};
+  const per=Math.ceil(n/2),pts=[];for(let i=0;i<n;i++){const top=i<per,k=top?i:i-per,cnt=top?per:n-per;pts.push([W/2+(k-(cnt-1)/2)*sp,top?-cd:H+cd])}
+  return{w:W,h:H,pts}}
+function half(o){if(o.seats){const d=dims(o);if(d.kind==='round')return[d.d/2+.55,d.d/2+.55];return[d.len/2+.15,d.wid/2+(o.couple?.3:.55)]}return[o.w/2,o.h/2]}
+function box(o,pad=0){const[hx,hy]=half(o),a=(o.rot||0)*Math.PI/180,c=Math.abs(Math.cos(a)),s=Math.abs(Math.sin(a));const ex=c*hx+s*hy+pad,ey=s*hx+c*hy+pad;return[o.x-ex,o.y-ey,o.x+ex,o.y+ey]}
+const hit=(a,b)=>a[0]<b[2]&&b[0]<a[2]&&a[1]<b[3]&&b[1]<a[3];
+function spaceIssues(t){const V=S.venue,b=box(t),out=[];
+  if(b[0]<0||b[1]<0||b[2]>V.w||b[3]>V.l)out.push('fora da sala');
+  S.tables.forEach(o=>{if(o!==t&&hit(b,box(o)))out.push('encosta à mesa '+o.name)});
+  S.els.forEach(e=>{if(e.type==='door'){if(hit(b,box(e,V.clear)))out.push('bloqueia a passagem da '+e.name)}else if(hit(b,box(e)))out.push('em cima de '+e.name)});return out}
+function defaultEls(V){return[
+  {id:'e1',ord:1,type:'door',name:'Entrada principal',x:V.w/2,y:V.l,w:2,h:.25,rot:0},{id:'e2',ord:2,type:'door',name:'Porta cozinha',x:V.w,y:2.5,w:1.2,h:.25,rot:90},
+  {id:'e3',ord:3,type:'staff',name:'Copa / staff',x:V.w-3,y:2,w:5,h:3,rot:0},{id:'e4',ord:4,type:'dance',name:'Pista de dança',x:V.w/2,y:5.6,w:8,h:5,rot:0},
+  {id:'e5',ord:5,type:'stage',name:'DJ',x:V.w/2+6,y:4.5,w:3,h:2,rot:0},{id:'e6',ord:6,type:'bar',name:'Bar',x:3,y:V.l-1.2,w:4,h:1.5,rot:0}]}
+const basePlanSrc=()=>(window.SRC_T||[]).map(t=>({name:t[0],theme:t[1],rect:!!t[2],guests:t[3]}));
+const basePlan=()=>S.base&&S.base.length?S.base:(window.SRC_T||[]).map(t=>({name:t[0],theme:t[1],rect:!!t[2],guests:t[3]}));
+function buildTables(){const pool=S.guests.slice(),V=S.venue,tables=[];
+  tables.push({id:'t0',ord:0,name:'Noivos',theme:'Diogo & Alessia',shape:'rect',couple:true,cap:2,x:V.w/2,y:1.6,rot:0,seats:[{ph:true,name:'Diogo',origin:'Amigo(a) do Casal'},{ph:true,name:'Alessia',origin:'Amigo(a) do Casal'}]});
+  basePlan().forEach((t,i)=>{const seats=t.guests.map(nm=>{const g=matchGuest(nm,pool);if(g){pool.splice(pool.indexOf(g),1);return{gid:g.id}}return{ph:true,ghost:true,name:nm,origin:'Extra'}});
+    tables.push({id:'t'+(i+1),ord:i+1,name:t.name,theme:t.theme,shape:t.rect?'rect':'round',cap:seats.length,x:0,y:0,rot:0,seats})});
+  tables.push({id:'ts',ord:99,name:'Staff',theme:'Fotógrafo, DJ, equipa',shape:'round',theo:true,cap:10,x:0,y:0,rot:0,seats:Array.from({length:10},(_,i)=>({ph:true,name:'Staff '+(i+1),origin:'Staff'}))});
+  S.tables=tables;let cx=1.2,cy=9.6,rowH=0;
+  tables.slice(1).forEach(t=>{const[hx,hy]=half(t);if(cx+2*hx>V.w-1){cx=1.2;cy+=rowH+1.4;rowH=0}t.x=+(cx+hx).toFixed(2);t.y=+(cy+hy).toFixed(2);cx+=2*hx+1.2;rowH=Math.max(rowH,2*hy)})}
+function seedState(){S={guests:(window.SRC_G||[]).map(mkGuest),base:basePlanSrc(),tables:[],els:[],venue:{w:34,l:26,seat:.62,clear:1.2},rules:{rMin:8,rMax:10,qMin:10,qMax:20,sDef:10,block:true},conflicts:[],config:structuredClone(DEF_CFG)};
+  S.els=defaultEls(S.venue);buildTables()}
+function seedFrom(j){const src=j&&j.state?j.state:j;if(!src||!Array.isArray(src.guests))throw new Error('formato');
+  const x=structuredClone(src);
+  x.guests=x.guests.map(g=>typeof g==='string'?{name:g}:g).filter(g=>g&&String(g.name||'').trim())
+    .map((g,i)=>({...newGuest({}),isNew:false,ord:i,...g,id:g.id||newId('g'),name:String(g.name).trim()}));
+  const t=Array.isArray(x.tables)?x.tables:[];
+  if(t.length&&!t.some(m=>Array.isArray(m.seats))){x.base=t.map(m=>({name:m.name||'Mesa',theme:m.theme||'',rect:!!m.rect,guests:(m.guests||[]).map(String)}));x.tables=[]}
+  S=normalize(x);if(!S.els.length)S.els=defaultEls(S.venue);if(!S.tables.length)buildTables();return S}
+function normalize(x){x.guests=x.guests||[];x.base=x.base||[];x.tables=x.tables||[];x.els=x.els||[];x.conflicts=x.conflicts||[];
+  x.venue={w:34,l:26,seat:.62,clear:1.2,...(x.venue||{})};x.rules={rMin:8,rMax:10,qMin:10,qMax:20,sDef:10,block:true,...(x.rules||{})};
+  x.config={...structuredClone(DEF_CFG),...(x.config||{})};x.config.origins={...(x.config.origins||DEF_CFG.origins)};
+  ['guests','tables','els'].forEach(k=>x[k].forEach((o,i)=>{if(o.ord==null)o.ord=i;if(o.rot==null&&k!=='guests')o.rot=0}));return x}
+
+const G=id=>S.guests.find(g=>g.id===id);
+const seatedIds=()=>new Set(S.tables.flatMap(t=>t.seats.filter(s=>s.gid).map(s=>s.gid)));
+const going=g=>g.rsvp!==NOT;
+const enemies=gid=>S.conflicts.filter(c=>c.includes(gid)).map(c=>c[0]===gid?c[1]:c[0]);
+const clashes=t=>{const ids=t.seats.filter(s=>s.gid).map(s=>s.gid);return S.conflicts.filter(([a,b])=>ids.includes(a)&&ids.includes(b))};
+function status(t){if(t.couple)return'';const n=t.seats.length,r=S.rules;if(n>t.cap)return'over';if(t.theo)return n>=t.cap?'full':'';
+  const[mn,mx]=t.shape==='round'?[r.rMin,r.rMax]:[r.qMin,r.qMax];if(t.cap>mx||t.cap<mn||n<mn)return'under';return n===t.cap?'full':''}
+function seatInfo(s){if(s.gid){const g=G(s.gid);return g?{name:g.name,origin:g.origin,g}:{name:'?',origin:'Extra'}}return{name:s.name,origin:s.origin}}
+const ini=n=>String(n).split(/\s+/).filter(w=>/^\p{Lu}/u.test(w)).slice(0,2).map(w=>w[0]).join('')||String(n)[0];
+const pSel=()=>active&&active.startsWith('p:')?active.slice(2):null;
+const tableOf=gid=>S.tables.find(t=>t.seats.some(s=>s.gid===gid));
+const findObj=id=>S.tables.find(x=>x.id===id)||S.els.find(x=>x.id===id);
+const save=()=>store.push();
+
+/* ================= rendering ================= */
+function renderHall(){const V=S.venue,HW=(V.w+2*OFF)*PX,HH=(V.l+2*OFF)*PX;$('hall').style.width=HW+'px';$('hall').style.height=HH+'px';
+  let h=`<div id="venue" style="left:${OFF*PX-6}px;top:${OFF*PX-6}px;width:${V.w*PX+12}px;height:${V.l*PX+12}px;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:${PX}px ${PX}px;background-position:6px 6px"></div>
+  <div class="dim" style="left:${OFF*PX+V.w*PX/2-20}px;top:${OFF*PX-34}px">${V.w} m</div><div class="dim" style="left:${OFF*PX-56}px;top:${OFF*PX+V.l*PX/2}px;transform:rotate(-90deg)">${V.l} m</div>`;
+  h+=S.els.map(e=>`<div class="el ${e.type}${active===e.id?' active':''}" data-id="${e.id}" style="left:${(OFF+e.x-e.w/2)*PX}px;top:${(OFF+e.y-e.h/2)*PX}px;width:${e.w*PX}px;height:${e.h*PX}px;transform:rotate(${e.rot}deg);--cr:${-e.rot}deg"><span>${esc(e.name)}</span></div>`).join('');
+  const me=pSel(),foes=me?enemies(me):[];
+  h+=S.tables.map(t=>{const g=geo(t),st=status(t),n=t.seats.length,cl=clashes(t).length,sp=spaceIssues(t).length;
+    const seats=g.pts.map((p,i)=>{const s=t.seats[i];if(!s)return`<div class="seat" style="left:${p[0]}px;top:${p[1]}px"></div>`;const f=seatInfo(s);
+      return`<div class="seat f${s.gid&&s.gid===me?' me':''}${s.gid&&foes.includes(s.gid)?' foe':''}${i>=t.cap?' x':''}${s.ph?' ph':''}${s.ghost?' ghost':''}" data-t="${t.id}" data-i="${i}" style="left:${p[0]}px;top:${p[1]}px;background:${col(f.origin)}">${esc(ini(f.name))}</div>`}).join('');
+    const fs=Math.max(10,Math.min(15,Math.min(g.w,g.h)/5.5));
+    return`<div class="tbl ${t.couple?'couple rect':t.shape}${t.theo?' theo':''} ${st}${cl?' clash':''}${sp?' space':''}${active===t.id?' active':''}" data-id="${t.id}" style="left:${(OFF+t.x)*PX-g.w/2}px;top:${(OFF+t.y)*PX-g.h/2}px;width:${g.w}px;height:${g.h}px;transform:rotate(${t.rot||0}deg);--cr:${-(t.rot||0)}deg">
+      <div class="top"><div><div class="tname" style="font-size:${fs}px">${t.couple?'♥ ':''}${esc(t.name)}</div><div class="tcnt">${n}/${t.cap}${cl?' · conflito':''}</div></div></div>${seats}</div>`}).join('');
+  $('hall').innerHTML=h}
+function renderSide(){const seated=seatedIds(),q=norm($('q').value),fo=$('fOrig').value;
+  const un=S.guests.filter(g=>!seated.has(g.id)&&going(g));
+  const vis=un.filter(g=>(!q||norm(g.name).includes(q))&&(!fo||g.origin===fo)).sort((a,b)=>b.isNew-a.isNew||a.ord-b.ord);
+  $('unH').textContent=`Por sentar (${un.length})`;$('bBadge').textContent=un.length||'';
+  $('unseated').innerHTML=vis.map(g=>`<div class="chip${sel===g.id?' sel':''}" draggable="true" data-g="${g.id}"><span class="dot" style="background:${col(g.origin)}"></span>${esc(g.name)}${enemies(g.id).length?' <span title="Tem incompatibilidades" style="color:var(--bad)">⚡</span>':''}${g.isNew?'<span class="new">novo</span>':''}</div>`).join('')||'<p style="color:var(--mute);font-size:14px">Ninguém por sentar.</p>';
+  const gh=S.tables.flatMap(t=>t.seats.filter(s=>s.ghost).map(s=>s.name));
+  $('ghH').textContent=gh.length?`Nomes do plano fora da lista (${gh.length})`:'';
+  $('ghosts').innerHTML=gh.length?'<p style="margin:2px 0 6px">Sentados como reservas (tracejado laranja). Abre a mesa para ligar a um convidado.</p>'+gh.map(esc).join(' · '):''}
+function renderStats(){const seated=seatedIds(),go=S.guests.filter(going),s=go.filter(g=>seated.has(g.id)).length;
+  const over=S.tables.filter(t=>status(t)==='over').length,under=S.tables.filter(t=>status(t)==='under').length,cl=S.tables.filter(t=>clashes(t).length).length,sp=S.tables.filter(t=>spaceIssues(t).length).length;
+  const ds=S.guests.filter(g=>!going(g)&&seated.has(g.id)).length,kids=go.filter(g=>/até 10/.test(g.age)).length,baby=go.filter(g=>/Colo/.test(g.age)).length;
+  const seatsTot=S.tables.filter(t=>!t.couple).reduce((a,t)=>a+t.cap,0);
+  $('stats').innerHTML=`<span class="pill ok">${s}/${go.length} sentados</span><span class="pill ${go.length-s?'warn':'ok'}">${go.length-s} por sentar</span><span class="pill">${S.tables.length-1} mesas · ${seatsTot} lugares</span>${over?`<span class="pill bad">${over} cheia(s) demais</span>`:''}${under?`<span class="pill warn">${under} fora da janela</span>`:''}${cl?`<span class="pill bad">${cl} com incompatibilidade</span>`:''}${sp?`<span class="pill bad">${sp} com problema de espaço</span>`:''}${ds?`<span class="pill bad">${ds} "não vai" sentado</span>`:''}<span class="pill">${kids} crianças · ${baby} colo</span>`}
+function renderHeader(){const c=S.config;$('ttl').textContent=c.title;$('sub').textContent=c.subtitle;document.title=c.title+' · Mesas';
+  const dd=Math.ceil((new Date(c.date)-new Date())/864e5);$('days').innerHTML=dd>0?`${dd} dias<small>até ao grande dia</small>`:'';
+  const oo=Object.keys(c.origins).map(o=>`<option>${esc(o)}</option>`).join('');
+  $('fOrig').innerHTML='<option value="">Todas as origens</option>'+oo;$('gfO').innerHTML='<option value="">Origem: todas</option>'+oo;
+  $('gfR').innerHTML='<option value="">RSVP: todos</option>'+c.rsvp.map(r=>`<option>${esc(r)}</option>`).join('')+'<option value="-">Sem resposta</option>';
+  $('legend').innerHTML=[...Object.keys(c.origins),'Staff','Extra'].map(o=>`<span><i class="dot" style="background:${col(o)}"></i>${esc(o.replace('Amigo(a) ','Amigos '))}</span>`).join('')}
+const closeBtn='<button class="x" data-close aria-label="Fechar">✕</button>';
+function rotRow(o){return`<div class="row"><label>Rotação</label><input type="range" id="iR" min="0" max="345" step="15" value="${o.rot||0}"><b id="iRv" style="width:40px">${o.rot||0}°</b></div><div class="row"><label></label><button data-r="-15">⟲ 15°</button><button data-r="15">⟳ 15°</button><button data-r="90">90°</button></div>`}
+function bindRot(o){$('iR').oninput=e=>{o.rot=+e.target.value;$('iRv').textContent=o.rot+'°';renderHall();renderStats()};$('iR').onchange=()=>{save();renderAll()};
+  $('insp').querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{o.rot=(((o.rot||0)+ +b.dataset.r)%360+360)%360;save();renderAll()})}
+function renderPerson(gid){const g=G(gid),upd=()=>{save();renderAll()};if(!g){active=null;return renderInsp()}
+  const t=tableOf(gid),foes=enemies(gid),others=S.tables.filter(x=>x!==t&&!x.couple).map(x=>`<option value="${x.id}">${esc(x.name)} (${x.seats.length}/${x.cap})</option>`).join('');
+  $('insp').innerHTML=`${closeBtn}<h3>Convidado</h3>
+  <div style="display:flex;gap:10px;align-items:center;margin:4px 0 10px"><span class="dot" style="width:34px;height:34px;background:${col(g.origin)}"></span><div><b style="font:700 22px/1.1 'Cormorant Garamond',serif">${esc(g.name)}</b><br><span style="font-size:13px;color:var(--mute)">${esc(g.origin)} · ${esc(g.age)}</span></div></div>
+  <div class="row"><label>RSVP</label><select id="pR">${['',...S.config.rsvp].map(x=>`<option${x===g.rsvp?' selected':''}>${esc(x)}</option>`).join('')}</select></div>
+  <div class="row"><label>Alimentação</label><input id="pD" value="${esc(g.diet)}" placeholder="vegetariano…" style="flex:1"></div>
+  <div class="row"><label>Mesa</label><b>${t?esc(t.name):'sem mesa'}</b></div>
+  <div class="row"><label>Mudar para</label><select id="pM" style="flex:1"><option value="">escolher mesa…</option>${others}</select></div>
+  ${t?'<div class="tools"><button id="pOut">Tirar da mesa</button></div>':''}
+  <h3>Não pode ficar com (${foes.length})</h3>
+  <ul class="glist">${foes.map(f=>{const ft=tableOf(f),same=ft&&ft===t;return`<li${same?' style="color:var(--bad);font-weight:700"':''}><span class="dot" style="background:${col(G(f).origin)}"></span>${esc(G(f).name)}<span style="font-size:12px;color:var(--mute)">${ft?esc(ft.name):''}${same?' · mesma mesa!':''}</span><button data-uf="${f}" aria-label="Remover">✕</button></li>`}).join('')||'<li style="color:var(--mute)">Ninguém</li>'}</ul>
+  <div class="row"><input id="pF" list="gnames" placeholder="Adicionar pessoa…" style="flex:1"><button class="rose" id="pFa">Adicionar</button></div>`;
+  $('gnames').innerHTML=S.guests.filter(x=>x.id!==gid).map(x=>`<option value="${esc(x.name)}">`).join('');
+  $('pR').onchange=e=>{g.rsvp=e.target.value;upd()};$('pD').onchange=e=>{g.diet=e.target.value;upd()};$('pM').onchange=e=>{if(e.target.value)seat(gid,e.target.value)};
+  if($('pOut'))$('pOut').onclick=()=>{t.seats=t.seats.filter(s=>s.gid!==gid);upd()};
+  const addF=()=>{const f=S.guests.find(x=>norm(x.name)===norm($('pF').value));if(!f||f.id===gid){toast('Escolhe uma pessoa da lista');return}
+    if(!S.conflicts.some(c=>c.includes(gid)&&c.includes(f.id)))S.conflicts.push([gid,f.id]);if(t&&tableOf(f.id)===t)toast(`Atenção: <b>${esc(f.name)}</b> está na mesma mesa`);upd()};
+  $('pFa').onclick=addF;$('pF').onkeydown=e=>{if(e.key==='Enter')addF()};
+  $('insp').querySelectorAll('[data-uf]').forEach(b=>b.onclick=()=>{S.conflicts=S.conflicts.filter(c=>!(c.includes(gid)&&c.includes(b.dataset.uf)));upd()})}
+function renderInsp(){$('plan').classList.toggle('noinsp',!active&&helpOff);
+  if(pSel())return renderPerson(pSel());const o=findObj(active),upd=()=>{save();renderAll()};
+  if(!o){$('insp').innerHTML=`<button class="x" id="hClose" aria-label="Fechar">✕</button><h3>Como usar</h3><p style="font-size:14px">Arrasta um convidado para uma mesa, ou toca no nome e depois na mesa. Arrasta mesas, portas e zonas para as mudar de sítio; toca numa para editar e rodar (tecla R roda 15°). Toca num lugar para ver a pessoa e as suas incompatibilidades.</p><p style="font-size:14px">No telemóvel: dois dedos para aproximar, um dedo no chão da sala para deslizar.</p><p style="font-size:14px">Cada quadrado da grelha é 1 m. Mesas fora da sala, encostadas ou a bloquear uma porta ficam com contorno vermelho tracejado.</p>`;
+    $('hClose').onclick=()=>{helpOff=true;try{localStorage.setItem('ad-help-off','1')}catch(e){}renderInsp()};return}
+  if(!o.seats){$('insp').innerHTML=`${closeBtn}<h3>${ELT[o.type][0]}</h3>
+    <div class="row"><label>Nome</label><input id="iN" value="${esc(o.name)}" style="flex:1"></div>
+    <div class="row"><label>Tipo</label><select id="iY">${Object.entries(ELT).map(([k,v])=>`<option value="${k}"${k===o.type?' selected':''}>${v[0]}</option>`).join('')}</select></div>
+    <div class="row"><label>Largura</label><input type="number" step="0.1" id="iW" value="${o.w}"> m</div>
+    ${o.type==='door'?'':`<div class="row"><label>Profund.</label><input type="number" step="0.1" id="iH" value="${o.h}"> m</div>`}
+    ${rotRow(o)}${o.type==='door'?'<p style="font-size:13px;color:var(--mute)">Perto de uma parede, a porta encaixa nela sozinha.</p>':''}<div class="tools"><button id="iDel">Apagar</button></div>`;
+    $('iN').onchange=e=>{o.name=e.target.value;upd()};$('iY').onchange=e=>{o.type=e.target.value;if(o.type==='door')o.h=.25;upd()};
+    $('iW').onchange=e=>{o.w=Math.max(.3,+e.target.value);upd()};if($('iH'))$('iH').onchange=e=>{o.h=Math.max(.3,+e.target.value);upd()};
+    bindRot(o);$('iDel').onclick=()=>{S.els=S.els.filter(x=>x!==o);active=null;upd()};return}
+  const t=o,st=status(t),r=S.rules,[mn,mx]=t.shape==='round'?[r.rMin,r.rMax]:[r.qMin,r.qMax],d=dims(t);
+  const msg=st==='over'?`<div class="warnbox bad">${t.seats.length-t.cap} pessoa(s) a mais nesta mesa</div>`:st==='under'?`<div class="warnbox warn">Fora da janela ${mn}–${mx} lugares</div>`:st==='full'?'<div class="warnbox ok">Mesa completa</div>':'';
+  const cmsg=clashes(t).map(([a,b])=>`<div class="warnbox bad">${esc(G(a).name)} e ${esc(G(b).name)} não podem estar juntos</div>`).join('');
+  const smsg=spaceIssues(t).map(x=>`<div class="warnbox bad">Espaço: ${esc(x)}</div>`).join('');
+  const opts=S.guests.filter(g=>!seatedIds().has(g.id)).map(g=>`<option value="${g.id}">${esc(g.name)}</option>`).join('');
+  $('insp').innerHTML=`${closeBtn}<h3>Mesa</h3>
+  <div class="row"><label>Nome</label><input id="iN" value="${esc(t.name)}" style="flex:1"></div>
+  <div class="row"><label>Grupo</label><input id="iT" value="${esc(t.theme||'')}" style="flex:1"></div>
+  ${t.couple?'':`<div class="row"><label>Forma</label><select id="iS"><option value="round"${t.shape==='round'?' selected':''}>Redonda</option><option value="rect"${t.shape==='rect'?' selected':''}>Retangular</option></select></div>`}
+  <div class="row"><label>Lugares</label><button id="iM">−</button><b style="width:30px;text-align:center">${t.cap}</b><button id="iP">+</button></div>
+  <div class="row"><label>Tamanho</label><span style="font-size:14px">${d.kind==='round'?'Ø '+d.d.toFixed(2)+' m':d.len.toFixed(1)+' × '+d.wid.toFixed(1)+' m'}</span></div>
+  ${rotRow(t)}${t.couple?'':`<div class="row"><label>Teórica</label><input type="checkbox" id="iTh"${t.theo?' checked':''}> <span style="font-size:13px">mesa de staff / reserva</span></div>`}
+  ${msg}${cmsg}${smsg}<h3>Sentados (${t.seats.length})</h3>
+  <ul class="glist">${t.seats.map((s,i)=>{const f=seatInfo(s);return`<li${i>=t.cap?' style="color:var(--bad)"':''}><span class="dot" style="background:${col(f.origin)}"></span>${s.gid?`<a href="#" data-p="${s.gid}" style="color:inherit">${esc(f.name)}</a>`:esc(f.name)}${s.ghost?` <select data-link="${i}" style="min-height:30px;font-size:13px;max-width:120px"><option value="">ligar a…</option>${opts}</select>`:''}<button data-rm="${i}" aria-label="Tirar">✕</button></li>`}).join('')}</ul>
+  <div class="tools"><button id="iPh">+ Lugar reservado</button>${t.couple?'':'<button id="iDel">Apagar mesa</button>'}</div>`;
+  $('iN').onchange=e=>{t.name=e.target.value;upd()};$('iT').onchange=e=>{t.theme=e.target.value;upd()};
+  if($('iS'))$('iS').onchange=e=>{t.shape=e.target.value;upd()};if($('iTh'))$('iTh').onchange=e=>{t.theo=e.target.checked;upd()};
+  $('iM').onclick=()=>{t.cap=Math.max(1,t.cap-1);upd()};$('iP').onclick=()=>{t.cap++;upd()};bindRot(t);
+  $('iPh').onclick=()=>{t.seats.push({ph:true,name:'Reserva '+(t.seats.length+1),origin:'Extra'});if(t.seats.length>t.cap)toast('Atenção: mesa <b>cheia demais</b>');upd()};
+  if($('iDel'))$('iDel').onclick=()=>modal(`<h2>Apagar ${esc(t.name)}?</h2><p>${t.seats.filter(s=>s.gid).length} pessoas voltam para "Por sentar".</p><div class="tools"><button class="rose" id="mOk">Apagar</button><button id="mNo">Cancelar</button></div>`,()=>{S.tables=S.tables.filter(x=>x!==t);active=null;closeM();upd()});
+  $('insp').querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{t.seats.splice(+b.dataset.rm,1);upd()});
+  $('insp').querySelectorAll('[data-p]').forEach(a=>a.onclick=e=>{e.preventDefault();active='p:'+a.dataset.p;renderHall();renderInsp()});
+  $('insp').querySelectorAll('[data-link]').forEach(s=>s.onchange=()=>{if(s.value){t.seats[+s.dataset.link]={gid:s.value};upd()}})}
+$('insp').addEventListener('click',e=>{if(e.target.closest('[data-close]')){active=null;renderHall();renderInsp()}});
+function renderAll(){renderHeader();renderHall();renderSide();renderStats();renderInsp();if($('guests').classList.contains('on'))renderGuests();if($('settings').classList.contains('on'))renderHist()}
+
+/* ================= seating & interactions ================= */
+function seat(gid,tid,force){const t=S.tables.find(x=>x.id===tid);if(!t)return;
+  const foes=enemies(gid).filter(e=>t.seats.some(s=>s.gid===e));
+  if(foes.length&&!force){const who=foes.map(e=>esc(G(e).name)).join(', ');
+    if(S.rules.block!==false){modal(`<h2>Incompatibilidade</h2><p><b>${esc(G(gid).name)}</b> não pode ficar na mesa <b>${esc(t.name)}</b> com ${who}.</p><div class="tools" style="margin-top:12px"><button class="pri" id="mOk">Ok, escolho outra</button><button id="mNo">Sentar mesmo assim</button></div>`,closeM);$('mNo').onclick=()=>{closeM();seat(gid,tid,true)};setSel(null);return}
+    toast(`${esc(G(gid).name)} e ${who} não deviam estar juntos`)}
+  S.tables.forEach(x=>x.seats=x.seats.filter(s=>s.gid!==gid));t.seats.push({gid});G(gid).isNew=false;
+  const st=status(t);if(st==='over')toast(`<b>${esc(t.name)}</b> está cheia demais (${t.seats.length}/${t.cap})`);else if(st==='full')toast(`<b>${esc(t.name)}</b> completa`);else toast(`${esc(G(gid).name)} → <b>${esc(t.name)}</b>`);
+  setSel(null,true);if(pSel()&&pSel()!==gid)active=null;save();renderAll()}
+function setSel(g,quiet){sel=g;const b=$('selbar');if(g){$('selTx').textContent=`A sentar ${G(g).name} · toca numa mesa`;b.style.display='flex'}else b.style.display='none';if(!quiet)renderSide()}
+$('selX').onclick=()=>setSel(null);
+$('unseated').addEventListener('dragstart',e=>{const c=e.target.closest('.chip');if(c)e.dataTransfer.setData('text/plain',c.dataset.g)});
+$('unseated').addEventListener('click',e=>{const c=e.target.closest('.chip');if(!c)return;const g=sel===c.dataset.g?null:c.dataset.g;setSel(g);
+  if(mobile()){$('tray').classList.remove('open');tab('plan')}else{active=g?'p:'+g:null;renderHall();renderInsp()}});
+$('hall').addEventListener('dragover',e=>{const t=e.target.closest('.tbl');if(t){e.preventDefault();document.querySelectorAll('.drop').forEach(x=>x!==t&&x.classList.remove('drop'));t.classList.add('drop')}});
+$('hall').addEventListener('dragleave',e=>{const t=e.target.closest('.tbl');if(t&&!t.contains(e.relatedTarget))t.classList.remove('drop')});
+$('hall').addEventListener('drop',e=>{const t=e.target.closest('.tbl'),g=e.dataTransfer.getData('text/plain');if(t&&g){e.preventDefault();seat(g,t.dataset.id)}});
+$('hall').addEventListener('click',e=>{const s=e.target.closest('.seat.f');if(!s)return;const t=S.tables.find(x=>x.id===s.dataset.t),st=t.seats[+s.dataset.i];
+  if(sel){seat(sel,t.id);return}active=st.gid?'p:'+st.gid:t.id;renderHall();renderInsp()});
+let drag=null,pinch=null;
+function snapDoor(e){const V=S.venue,d=[[e.x,'l'],[V.w-e.x,'r'],[e.y,'t'],[V.l-e.y,'b']].sort((a,b)=>a[0]-b[0])[0];if(d[0]>1.2)return;
+  if(d[1]==='l'){e.x=0;e.rot=90}else if(d[1]==='r'){e.x=V.w;e.rot=90}else if(d[1]==='t'){e.y=0;e.rot=0}else{e.y=V.l;e.rot=0}}
+$('hall').addEventListener('pointerdown',e=>{if(pinch)return;const h=e.target.closest('.top')?e.target.closest('.tbl'):e.target.closest('.el');if(!h)return;
+  const o=findObj(h.dataset.id);drag={o,el:h,sx:e.clientX,sy:e.clientY,ox:o.x,oy:o.y,moved:false};h.setPointerCapture(e.pointerId)});
+$('hall').addEventListener('pointermove',e=>{if(!drag||pinch)return;const dx=(e.clientX-drag.sx)/zoom/PX,dy=(e.clientY-drag.sy)/zoom/PX;
+  if(Math.abs(dx)+Math.abs(dy)>.15)drag.moved=true;if(!drag.moved)return;const o=drag.o;o.x=Math.round((drag.ox+dx)*4)/4;o.y=Math.round((drag.oy+dy)*4)/4;
+  const w=parseFloat(drag.el.style.width),h=parseFloat(drag.el.style.height);drag.el.style.left=(OFF+o.x)*PX-w/2+'px';drag.el.style.top=(OFF+o.y)*PX-h/2+'px'});
+$('hall').addEventListener('pointerup',()=>{if(!drag)return;const d=drag;drag=null;
+  if(d.moved){const cur=findObj(d.o.id);if(cur&&cur!==d.o){cur.x=d.o.x;cur.y=d.o.y}if(d.o.type==='door')snapDoor(cur||d.o);save();renderAll();flushPending();return}
+  if(sel&&d.o.seats){seat(sel,d.o.id);return}active=active===d.o.id?null:d.o.id;renderHall();renderInsp()});
+$('hall').addEventListener('pointercancel',()=>{if(drag){const d=drag;drag=null;d.o.x=d.ox;d.o.y=d.oy;renderHall()}});
+document.addEventListener('keydown',e=>{if(e.target.matches('input,select,textarea'))return;if(e.key==='Escape'){active=null;setSel(null);renderHall();renderInsp();return}
+  const o=findObj(active);if(o&&(e.key==='r'||e.key==='R')){o.rot=((o.rot||0)+(e.shiftKey?-15:15)+360)%360;save();renderAll()}});
+/* pinch zoom */
+const hw=$('hallwrap');
+hw.addEventListener('touchstart',e=>{if(e.touches.length===2){drag=null;const[a,b]=e.touches;const r=hw.getBoundingClientRect();const mx=(a.clientX+b.clientX)/2-r.left,my=(a.clientY+b.clientY)/2-r.top;
+  pinch={d:Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY),z:zoom,cx:(hw.scrollLeft+mx)/zoom,cy:(hw.scrollTop+my)/zoom,mx,my}}},{passive:true});
+hw.addEventListener('touchmove',e=>{if(!pinch||e.touches.length!==2)return;e.preventDefault();const[a,b]=e.touches;setZ(pinch.z*Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY)/pinch.d);
+  hw.scrollLeft=pinch.cx*zoom-pinch.mx;hw.scrollTop=pinch.cy*zoom-pinch.my},{passive:false});
+hw.addEventListener('touchend',e=>{if(e.touches.length<2&&pinch){pinch=null;try{localStorage.setItem('ad-zoom',zoom)}catch(_){}}});
+/* tooltip */
+$('hall').addEventListener('pointerover',e=>{if(e.pointerType==='touch')return;const s=e.target.closest('.seat.f');if(!s){$('tip').style.display='none';return}
+  const t=S.tables.find(x=>x.id===s.dataset.t),st=t.seats[+s.dataset.i],f=seatInfo(st);
+  $('tip').innerHTML=`<b>${esc(f.name)}</b>${esc(f.origin)}${f.g?`<br>${esc(f.g.age)} · RSVP: ${esc(f.g.rsvp||'sem resposta')}${f.g.diet?'<br>Alimentação: '+esc(f.g.diet):''}${enemies(f.g.id).length?'<br>Longe de: '+enemies(f.g.id).map(e=>esc(G(e)?.name)).join(', '):''}`:st.ghost?'<br>Não está na lista de convidados':'<br>Lugar reservado'}${+s.dataset.i>=t.cap?'<br><span style="color:#ff9b9b">Lugar a mais</span>':''}`;$('tip').style.display='block'});
+document.addEventListener('pointermove',e=>{const tp=$('tip');if(tp.style.display==='block'){tp.style.left=Math.min(innerWidth-250,e.clientX+14)+'px';tp.style.top=(e.clientY+14)+'px'}});
+$('hall').addEventListener('pointerleave',()=>$('tip').style.display='none');
+/* zoom & add */
+const hallW=()=>(S.venue.w+2*OFF)*PX,hallH=()=>(S.venue.l+2*OFF)*PX;
+function setZ(z){zoom=Math.min(2,Math.max(.25,z));$('hall').style.transform=`scale(${zoom})`;$('hall').style.marginBottom=`${(zoom-1)*hallH()}px`;$('hall').style.marginRight=`${(zoom-1)*hallW()}px`}
+const fit=()=>setZ(Math.min((hw.clientWidth-10)/hallW(),(hw.clientHeight-60)/hallH())||1);
+$('zIn').onclick=()=>setZ(zoom+.1);$('zOut').onclick=()=>setZ(zoom-.1);$('zFit').onclick=fit;
+$('help').onclick=()=>{helpOff=!helpOff||!!active;active=null;if(!helpOff)try{localStorage.removeItem('ad-help-off')}catch(e){};renderHall();renderInsp()};
+document.querySelectorAll('[data-addt]').forEach(b=>b.onclick=()=>{const k=b.dataset.addt,theo=k==='staff',shape=k==='rect'?'rect':'round',cap=theo?S.rules.sDef:shape==='round'?S.rules.rMax:S.rules.qMin,id=newId('t');
+  S.tables.push({id,ord:Date.now(),name:theo?'Staff '+(S.tables.filter(t=>t.theo).length+1):'Nova mesa',theme:'',shape,theo,cap,x:S.venue.w/2,y:S.venue.l/2,rot:0,seats:theo?Array.from({length:cap},(_,i)=>({ph:true,name:'Staff '+(i+1),origin:'Staff'})):[]});
+  active=id;save();renderAll();toast('Mesa nova no centro da sala')});
+document.querySelectorAll('[data-adde]').forEach(b=>b.onclick=()=>{const k=b.dataset.adde,[n,w,h]=ELT[k],id=newId('e');
+  S.els.push({id,ord:Date.now(),type:k,name:n,x:S.venue.w/2,y:k==='door'?S.venue.l:S.venue.l/2,w,h,rot:0});active=id;save();renderAll()});
+
+/* ================= guests tab ================= */
+function renderGuests(){const seatMap={};S.tables.forEach(t=>t.seats.forEach(s=>{if(s.gid)seatMap[s.gid]=t.name}));
+  const all=S.guests.slice().sort((a,b)=>a.ord-b.ord),c=r=>all.filter(g=>g.rsvp===r).length,R=S.config.rsvp;
+  $('gk').innerHTML=`<div><b>${all.length}</b><span>na lista</span></div>`+R.map(r=>`<div><b>${c(r)}</b><span>${esc(r)}</span></div>`).join('')+`<div><b>${all.filter(g=>!g.rsvp).length}</b><span>sem resposta</span></div><div><b>${all.filter(g=>g.std==='Enviado').length}</b><span>save the date enviados</span></div><div><b>${all.filter(g=>g.phys||g.dig).length}</b><span>convites entregues</span></div>`;
+  const q=norm($('gq').value),fo=$('gfO').value,fr=$('gfR').value,fs=$('gfS').value;
+  const rows=all.filter(g=>(!q||norm(g.name).includes(q))&&(!fo||g.origin===fo)&&(!fr||(fr==='-'?!g.rsvp:g.rsvp===fr))&&(!fs||(fs==='y')===!!seatMap[g.id]));
+  const sl=(k,v,o)=>`<select data-k="${k}">${o.map(x=>`<option${x===v?' selected':''}>${esc(x)}</option>`).join('')}</select>`;
+  const H=['Nome','Origem','Idade','RSVP','Save the date','Físico','Digital','Quem entrega','Alimentação','Mesa',''];
+  $('gt').innerHTML=`<thead><tr>${H.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>`+rows.map(g=>{const cells=[`<input data-k="name" value="${esc(g.name)}" style="width:190px">`,sl('origin',g.origin,[...new Set([...Object.keys(S.config.origins),g.origin])]),sl('age',g.age,S.config.ages),sl('rsvp',g.rsvp,['',...S.config.rsvp]),sl('std',g.std,['','Enviado']),
+    `<input type="checkbox" data-k="phys"${g.phys?' checked':''}>`,`<input type="checkbox" data-k="dig"${g.dig?' checked':''}>`,sl('holder',g.holder,['',...S.config.holders]),`<input data-k="diet" value="${esc(g.diet)}" placeholder="vegetariano…" style="width:120px">`,esc(seatMap[g.id]||'—'),'<button data-del aria-label="Remover">✕</button>'];
+    return`<tr data-id="${g.id}">${cells.map((c,i)=>`<td data-l="${H[i]}">${c}</td>`).join('')}</tr>`}).join('')+'</tbody>'}
+$('gt').addEventListener('change',e=>{const tr=e.target.closest('tr'),g=G(tr.dataset.id),k=e.target.dataset.k;if(!k)return;g[k]=e.target.type==='checkbox'?e.target.checked:e.target.value;
+  if(k==='rsvp'&&g.rsvp===NOT&&seatedIds().has(g.id))toast(`${esc(g.name)} não vai mas está sentado(a)`);save();renderStats();renderSide()});
+$('gt').addEventListener('click',e=>{if(!e.target.matches('[data-del]'))return;const id=e.target.closest('tr').dataset.id,g=G(id);
+  modal(`<h2>Remover ${esc(g.name)}?</h2><p>Sai da lista e da mesa.</p><div class="tools"><button class="rose" id="mOk">Remover</button><button id="mNo">Cancelar</button></div>`,()=>{removeGuest(S,id);closeM();save();renderAll()})});
+function removeGuest(X,id){X.guests=X.guests.filter(g=>g.id!==id);X.tables.forEach(t=>t.seats=t.seats.filter(s=>s.gid!==id));X.conflicts=X.conflicts.filter(c=>!c.includes(id))}
+['gq','gfO','gfR','gfS'].forEach(i=>$(i).addEventListener('input',renderGuests));
+$('addG').onclick=()=>{const g=newGuest({ord:-Date.now()});S.guests.push(g);save();renderAll();const i=$('gt').querySelector(`tr[data-id="${g.id}"] input`);if(i){i.focus();i.select()}};
+
+/* ================= settings ================= */
+const R=['rMin','rMax','qMin','qMax','sDef'];
+function fillSettings(){R.forEach(k=>$(k).value=S.rules[k]);$('cBlk').checked=S.rules.block!==false;const V=S.venue;$('vW').value=V.w;$('vL').value=V.l;$('vS').value=V.seat;$('vC').value=V.clear;
+  const go=S.guests.filter(going).length;$('vInfo').textContent=`${(V.w*V.l).toFixed(0)} m² · ${(V.w*V.l/Math.max(1,go)).toFixed(1)} m² por convidado (referência habitual para jantar sentado com pista: 1,5–2 m²)`;
+  renderConf();renderHist();$('who').textContent=store.who?`Sessão iniciada como ${store.who}. Sincronizado com o Diogo/Alessia em tempo real.`:'Modo local: os dados ficam só neste dispositivo (configura o Firebase para sincronizar).';
+  $('logout').hidden=!store.who;$('ver').textContent='Versão '+APP_VERSION}
+$('saveRules').onclick=()=>{R.forEach(k=>S.rules[k]=+$(k).value||0);save();renderAll();toast('Regras guardadas')};
+$('saveVenue').onclick=()=>{const V=S.venue;V.w=Math.max(5,+$('vW').value||V.w);V.l=Math.max(5,+$('vL').value||V.l);V.seat=Math.max(.4,+$('vS').value||V.seat);V.clear=Math.max(0,+$('vC').value);
+  S.els.filter(e=>e.type==='door').forEach(snapDoor);save();renderAll();fillSettings();toast('Sala guardada')};
+function renderConf(){$('gnames').innerHTML=S.guests.map(g=>`<option value="${esc(g.name)}">`).join('');S.conflicts=S.conflicts.filter(([a,b])=>G(a)&&G(b));
+  $('cList').innerHTML=S.conflicts.map(([a,b],i)=>`<li>${esc(G(a).name)} <span style="color:var(--mute)">×</span> ${esc(G(b).name)}<button data-c="${i}" aria-label="Remover">✕</button></li>`).join('')||'<li style="color:var(--mute)">Nenhuma ainda</li>'}
+$('cAdd').onclick=()=>{const f=v=>S.guests.find(g=>norm(g.name)===norm(v)),a=f($('cA').value),b=f($('cB').value);if(!a||!b||a===b){toast('Escolhe duas pessoas da lista');return}
+  if(!S.conflicts.some(c=>c.includes(a.id)&&c.includes(b.id)))S.conflicts.push([a.id,b.id]);$('cA').value=$('cB').value='';save();renderConf();renderAll()};
+$('cList').onclick=e=>{if(e.target.dataset.c==null)return;S.conflicts.splice(+e.target.dataset.c,1);save();renderConf();renderAll()};
+$('cBlk').onchange=e=>{S.rules.block=e.target.checked;save()};
+$('reset').onclick=()=>!basePlan().length?toast('Não há plano base guardado'):modal(`<h2>Repor plano base?</h2><p>As mesas voltam à folha "Best Distribuição de Mesas". Convidados, RSVP, incompatibilidades, portas e zonas ficam como estão.</p><div class="tools" style="margin-top:12px"><button class="rose" id="mOk">Repor</button><button id="mNo">Cancelar</button></div>`,()=>{buildTables();active=null;save();renderAll();closeM();toast('Plano base reposto')});
+$('xl').onchange=async e=>{const f=e.target.files[0];if(!f)return;if(!window.XLSX){toast('Sem ligação para ler o Excel');return}
+  const wb=XLSX.read(await f.arrayBuffer()),ws=wb.Sheets['Lista de Convidados'];if(!ws){toast('Folha "Lista de Convidados" não encontrada');return}
+  const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null}).slice(5).map(r=>r.slice(2,12)).filter(r=>r[1]&&r[1]!=='Nome do convidado');
+  const inFile=new Map(rows.map(r=>[norm(r[1]),r])),have=new Map(S.guests.map(g=>[norm(g.name),g]));
+  const removed=S.guests.filter(g=>!inFile.has(norm(g.name))),added=rows.filter(r=>!have.has(norm(r[1])));
+  removed.forEach(g=>removeGuest(S,g.id));added.forEach(r=>{const g=mkGuest(r,0);S.guests.push(newGuest({...g,id:newId('g'),ord:Date.now(),isNew:true}))});
+  rows.forEach(r=>{const g=have.get(norm(r[1]));if(g){g.origin=r[2]||g.origin;g.age=r[3]||g.age;if(r[8])g.rsvp=r[8]}});
+  save();renderAll();e.target.value='';
+  modal(`<h2>Excel atualizado</h2><p><b>${added.length}</b> novos, à espera de mesa:</p><p>${added.map(r=>esc(r[1])).join(', ')||'—'}</p><p><b>${removed.length}</b> removidos do plano:</p><p>${removed.map(g=>esc(g.name)).join(', ')||'—'}</p><div class="tools" style="margin-top:12px"><button class="rose" id="mOk">Ver por sentar</button></div>`,()=>{closeM();tab('plan');if(mobile())$('tray').classList.add('open')})};
+function download(name,blob){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.append(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
+$('xOut').onclick=()=>{if(!window.XLSX){toast('Sem ligação para gerar o Excel');return}const seatMap={};S.tables.forEach(t=>t.seats.forEach(s=>{if(s.gid)seatMap[s.gid]=t.name}));
+  const g=S.guests.slice().sort((a,b)=>a.ord-b.ord).map(x=>({Nome:x.name,Origem:x.origin,Idade:x.age,RSVP:x.rsvp,'Save the Date':x.std,'Convite Físico':x.phys?'Sim':'','Convite Digital':x.dig?'Sim':'','Quem entrega':x.holder,'Alimentação':x.diet,Mesa:seatMap[x.id]||''}));
+  const t=[];S.tables.forEach(tb=>tb.seats.forEach((s,i)=>t.push({Mesa:tb.name,Grupo:tb.theme,Lugar:i+1,Nome:seatInfo(s).name,Origem:seatInfo(s).origin})));
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(g),'Convidados');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(t),'Mesas');XLSX.writeFile(wb,'Casamento_Diogo_Alessia.xlsx')};
+const exportState=()=>JSON.stringify({app:'mesas-ad',version:APP_VERSION,exportedAt:new Date().toISOString(),state:S},null,1);
+$('jOut').onclick=()=>download(`casamento-backup-${new Date().toISOString().slice(0,10)}.json`,new Blob([exportState()],{type:'application/json'}));
+$('logout').onclick=()=>store.logout();
+
+/* ================= hidden advanced area: JSON updates ================= */
+let taps=0,tapT=0;$('ver').onclick=()=>{const n=Date.now();taps=n-tapT<700?taps+1:1;tapT=n;if(taps>=5){$('adv').hidden=!$('adv').hidden;taps=0;toast($('adv').hidden?'Área avançada escondida':'Área avançada aberta');if(!$('adv').hidden)$('adv').scrollIntoView({behavior:'smooth'})}};
+const TPL={_comment:'Apaga as secções que não precisas. Pessoas por nome ou id.',
+  config:{subtitle:'4 setembro 2027 · Quinta dos Quinteiros',origins:{'Colegas':'#7a6ff0'},rsvp:['Confirmado','Ainda não sabe','Não vai'],holders:['Alessia','Diogo','Correio']},
+  venue:{w:34,l:26},rules:{rMin:8,rMax:10},
+  guests:{upsert:[{name:'Nome Novo',origin:'Amigo(a) do Casal',age:'Adulto'},{name:'Tia Mita',rsvp:'Confirmado',diet:'sem glúten'}],remove:['Nome a remover']},
+  tables:{upsert:[{name:'Friends',cap:12},{name:'Mesa Nova',shape:'round',cap:10,x:10,y:20,rot:0,seats:['Nome Novo']}],remove:['Mesa a apagar']},
+  els:{upsert:[{name:'Bar',type:'bar',x:3,y:24,w:4,h:1.5}],remove:[]},
+  conflicts:{add:[['Pessoa A','Pessoa B']],remove:[]}};
+$('aTpl').onclick=()=>{$('aTx').value=JSON.stringify(TPL,null,2)};
+$('aExp').onclick=()=>{$('aTx').value=exportState();try{navigator.clipboard.writeText($('aTx').value);toast('Estado copiado')}catch(e){}};
+$('aFile').onchange=async e=>{const f=e.target.files[0];if(f)$('aTx').value=await f.text();e.target.value=''};
+$('aUpd').onclick=async()=>{const r=await navigator.serviceWorker?.getRegistration();if(r){await r.update();toast('A procurar versão nova…');setTimeout(()=>location.reload(),1500)}else location.reload()};
+function applyPatch(p){const X=structuredClone(S),log=[],warn=[];const fg=v=>X.guests.find(g=>g.id===v)||X.guests.find(g=>norm(g.name)===norm(v));
+  const findBy=(arr,v)=>arr.find(o=>o.id===v)||arr.find(o=>norm(o.name)===norm(v));
+  if(p.state){const st=normalize(structuredClone(p.state));log.push(`Substituir tudo: ${st.guests.length} convidados, ${st.tables.length} mesas, ${st.els.length} zonas`);return{X:st,log,warn,full:true}}
+  const known=['_comment','config','venue','rules','guests','tables','els','conflicts','app','version','exportedAt'];Object.keys(p).forEach(k=>{if(!known.includes(k))warn.push('Secção desconhecida ignorada: '+k)});
+  if(p.config){const o=p.config.origins;X.config={...X.config,...p.config,origins:{...X.config.origins,...(o||{})}};Object.entries(o||{}).forEach(([k,v])=>{if(v===null)delete X.config.origins[k]});log.push('Configuração: '+Object.keys(p.config).join(', '))}
+  if(p.venue){Object.assign(X.venue,p.venue);log.push('Sala: '+Object.entries(p.venue).map(([k,v])=>k+'='+v).join(', '))}
+  if(p.rules){Object.assign(X.rules,p.rules);log.push('Regras: '+Object.entries(p.rules).map(([k,v])=>k+'='+v).join(', '))}
+  (p.guests?.remove||[]).forEach(v=>{const g=fg(v);if(g){removeGuest(X,g.id);log.push('Remover convidado '+g.name)}else warn.push('Convidado não encontrado: '+v)});
+  (p.guests?.upsert||[]).forEach(o=>{if(!o||!o.name&&!o.id){warn.push('Convidado sem nome ignorado');return}const g=o.id?fg(o.id):fg(o.name),{id,...rest}=o;
+    if(g){Object.assign(g,rest);log.push('Atualizar '+g.name+': '+Object.keys(rest).filter(k=>k!=='name'||rest.name!==g.name).join(', '))}else{X.guests.push(newGuest({...rest,isNew:true}));log.push('Novo convidado '+o.name)}});
+  const seatsFrom=arr=>arr.map(s=>{if(typeof s==='object'&&s)return s;const g=fg(s);if(g){X.tables.forEach(t=>t.seats=t.seats.filter(x=>x.gid!==g.id));return{gid:g.id}}warn.push('Lugar sem convidado na lista (fica como reserva): '+s);return{ph:true,name:String(s),origin:'Extra'}});
+  (p.tables?.remove||[]).forEach(v=>{const t=findBy(X.tables,v);if(t){X.tables=X.tables.filter(x=>x!==t);log.push('Apagar mesa '+t.name)}else warn.push('Mesa não encontrada: '+v)});
+  (p.tables?.upsert||[]).forEach(o=>{const t=findBy(X.tables,o.id||o.name),{id,seats,...rest}=o;
+    if(t){Object.assign(t,rest);if(seats)t.seats=seatsFrom(seats);log.push('Atualizar mesa '+t.name+': '+Object.keys(o).filter(k=>k!=='id').join(', '))}
+    else{const nt={id:newId('t'),ord:Date.now(),name:'Nova mesa',theme:'',shape:'round',cap:X.rules.rMax,x:X.venue.w/2,y:X.venue.l/2,rot:0,...rest,seats:[]};nt.seats=seatsFrom(seats||[]);if(!o.cap)nt.cap=Math.max(nt.cap,nt.seats.length);X.tables.push(nt);log.push('Nova mesa '+nt.name)}});
+  (p.els?.remove||[]).forEach(v=>{const e=findBy(X.els,v);if(e){X.els=X.els.filter(x=>x!==e);log.push('Apagar zona '+e.name)}else warn.push('Zona não encontrada: '+v)});
+  (p.els?.upsert||[]).forEach(o=>{const e=findBy(X.els,o.id||o.name),{id,...rest}=o;if(e){Object.assign(e,rest);log.push('Atualizar zona '+e.name)}else{const t=rest.type&&ELT[rest.type]?rest.type:'other';X.els.push({id:newId('e'),ord:Date.now(),type:t,name:ELT[t][0],x:X.venue.w/2,y:X.venue.l/2,w:ELT[t][1],h:ELT[t][2],rot:0,...rest});log.push('Nova zona '+(rest.name||ELT[t][0]))}});
+  (p.conflicts?.add||[]).forEach(([a,b])=>{const A=fg(a),B=fg(b);if(A&&B&&A!==B){if(!X.conflicts.some(c=>c.includes(A.id)&&c.includes(B.id)))X.conflicts.push([A.id,B.id]);log.push(`Incompatível: ${A.name} × ${B.name}`)}else warn.push(`Incompatibilidade ignorada: ${a} × ${b}`)});
+  (p.conflicts?.remove||[]).forEach(([a,b])=>{const A=fg(a),B=fg(b);if(A&&B){X.conflicts=X.conflicts.filter(c=>!(c.includes(A.id)&&c.includes(B.id)));log.push(`Já não incompatível: ${A.name} × ${B.name}`)}});
+  return{X:normalize(X),log,warn}}
+$('aPrev').onclick=()=>{let p;try{p=JSON.parse($('aTx').value)}catch(e){$('aMsg').textContent='JSON inválido: '+e.message;return}
+  let r;try{r=applyPatch(p)}catch(e){$('aMsg').textContent='Erro: '+e.message;return}
+  if(!r.log.length){$('aMsg').textContent='Nada para aplicar.'+(r.warn.length?' '+r.warn.join('; '):'');return}
+  modal(`<h2>${r.full?'Substituir todos os dados?':'Aplicar atualização?'}</h2><div class="log"><ul>${r.log.map(l=>`<li>${esc(l)}</li>`).join('')}</ul>${r.warn.length?`<h4>Avisos</h4><ul>${r.warn.map(l=>`<li>${esc(l)}</li>`).join('')}</ul>`:''}</div><div class="tools" style="margin-top:12px"><button class="rose" id="mOk">Aplicar</button><button id="mNo">Cancelar</button></div>`,
+    ()=>{S=r.X;active=null;save();renderAll();fillSettings();closeM();$('aMsg').textContent='Aplicado: '+r.log.length+' alteração(ões).';toast('Atualização aplicada')})};
+
+/* ================= change history & "what changed" ================= */
+const nameOf=email=>{const n=(S?.config.names||{})[email];if(n)return n;const p=String(email||'').split('@')[0];return /dio/i.test(p)?'Diogo':/ale/i.test(p)?'Alessia':p||'Alguém'};
+function describe(k,o,n){/* o,n: old/new objects or null */const L=[];
+  if(k==='guests'){if(!o)return['Adicionou '+n.name];if(!n)return['Removeu '+o.name];const nm=n.name;
+    if(o.name!==n.name)L.push(`Mudou o nome de ${o.name} para ${n.name}`);if(o.rsvp!==n.rsvp)L.push(`RSVP de ${nm}: ${n.rsvp||'sem resposta'}`);
+    if(o.origin!==n.origin)L.push(`${nm} passou a ${n.origin}`);if(o.age!==n.age)L.push(`${nm}: ${n.age}`);if(o.std!==n.std)L.push(`Save the date de ${nm}: ${n.std||'por enviar'}`);
+    if(o.phys!==n.phys)L.push(`Convite físico de ${nm} ${n.phys?'entregue':'por entregar'}`);if(o.dig!==n.dig)L.push(`Convite digital de ${nm} ${n.dig?'enviado':'por enviar'}`);
+    if(o.holder!==n.holder)L.push(`Convite de ${nm} entregue por ${n.holder||'—'}`);if(o.diet!==n.diet)L.push(`Alimentação de ${nm}: ${n.diet||'—'}`);return L}
+  if(k==='tables'){if(!o)return['Criou a mesa '+n.name];if(!n)return['Apagou a mesa '+o.name];
+    const ids=t=>t.seats.map(s=>s.gid||'ph:'+s.name),a=ids(o),b=ids(n),lab=x=>x.startsWith('ph:')?x.slice(3):(G(x)?.name||'?');
+    b.filter(x=>!a.includes(x)).forEach(x=>L.push(`Sentou ${lab(x)} na mesa ${n.name}`));a.filter(x=>!b.includes(x)).forEach(x=>L.push(`Tirou ${lab(x)} da mesa ${n.name}`));
+    if(o.name!==n.name)L.push(`Mesa ${o.name} passou a chamar-se ${n.name}`);if(o.cap!==n.cap)L.push(`Mesa ${n.name}: ${n.cap} lugares`);if(o.shape!==n.shape)L.push(`Mesa ${n.name} agora é ${n.shape==='round'?'redonda':'retangular'}`);
+    if(o.x!==n.x||o.y!==n.y||o.rot!==n.rot)L.push(`Mudou a mesa ${n.name} de sítio`);return L}
+  if(k==='els'){if(!o)return['Adicionou '+n.name];if(!n)return['Removeu '+o.name];return[`Alterou ${n.name}`]}
+  if(k==='meta'){if(JSON.stringify(o.venue)!==JSON.stringify(n.venue))L.push(`Sala: ${n.venue.w} × ${n.venue.l} m`);if(JSON.stringify(o.rules)!==JSON.stringify(n.rules))L.push('Alterou as regras das mesas');
+    const ca=o.conflicts||[],cb=n.conflicts||[],cn=c=>c.split('|').map(id=>G(id)?.name||'?').join(' × ');cb.filter(c=>!ca.includes(c)).forEach(c=>L.push('Nova incompatibilidade: '+cn(c)));ca.filter(c=>!cb.includes(c)).forEach(c=>L.push('Removeu incompatibilidade: '+cn(c)));
+    if(JSON.stringify(o.config)!==JSON.stringify(n.config))L.push('Alterou as configurações da app');return L}return L}
+function logHtml(entries){if(!entries.length)return'<p style="color:var(--mute)">Sem alterações registadas.</p>';
+  const groups=[];entries.forEach(e=>{const d=new Date(e.at),key=nameOf(e.by)+' · '+d.toLocaleDateString('pt-PT',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'});
+    const last=groups[groups.length-1];if(last&&last.by===e.by&&Math.abs(last.at-e.at)<15*60e3)last.lines.push(...e.lines);else groups.push({key,by:e.by,at:e.at,lines:[...e.lines]})});
+  return groups.map(g=>{const u=[...new Set(g.lines)];const lines=u.length>14?[...u.slice(0,14),`… e mais ${u.length-14}`]:u;return`<h4>${esc(g.key)}</h4><ul>${lines.map(l=>`<li>${esc(l)}</li>`).join('')}</ul>`}).join('')}
+async function renderHist(){$('hist').innerHTML=store.history?logHtml((await store.history(60)).reverse()):'<p style="color:var(--mute)">O histórico partilhado funciona com o Firebase ligado.</p>'}
+
+/* ================= ui helpers ================= */
+function modal(h,ok){$('mbody').innerHTML=h;$('modal').style.display='grid';const b=$('mOk');if(b)b.onclick=ok;if($('mNo'))$('mNo').onclick=closeM}
+function closeM(){$('modal').style.display='none'}
+$('modal').onclick=e=>{if(e.target.id==='modal'&&!$('modal').dataset.lock)closeM()};
+function toast(h){const d=document.createElement('div');d.className='t';d.innerHTML=h;$('toast').append(d);setTimeout(()=>d.remove(),2800)}
+function tab(v){document.querySelectorAll('nav.tabs [role=tab]').forEach(b=>b.setAttribute('aria-selected',b.dataset.v===v));
+  document.querySelectorAll('.bnav button').forEach(b=>b.setAttribute('aria-selected',b.dataset.b===v||(b.dataset.b==='tray'&&v==='plan'&&$('tray').classList.contains('open'))));
+  document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on',s.id===v));if(v==='guests')renderGuests();if(v==='settings')fillSettings()}
+document.querySelectorAll('nav.tabs [role=tab]').forEach(b=>b.onclick=()=>tab(b.dataset.v));
+document.querySelectorAll('.bnav button').forEach(b=>b.onclick=()=>{const v=b.dataset.b;
+  if(v==='tray'){const open=!$('tray').classList.contains('open');active=null;renderInsp();$('tray').classList.toggle('open',open);tab('plan');return}
+  $('tray').classList.remove('open');tab(v)});
+$('q').oninput=renderSide;$('fOrig').onchange=renderSide;
+/* defer remote re-render while typing or dragging */
+let pending=false;const busy=()=>drag||pinch||(document.activeElement&&document.activeElement.matches('input:not([type=checkbox]):not([type=range]),select,textarea')&&document.activeElement.closest('#insp,#gt,#settings'));
+function remoteRender(){if(!booted)return;if(busy()){pending=true;return}renderAll()}
+function flushPending(){if(pending&&!busy()){pending=false;renderAll()}}
+document.addEventListener('focusout',()=>setTimeout(flushPending,50));
+
+/* ================= stores ================= */
+function localStore(){const KEY='ad-wedding-app';return{who:null,
+  async start(){let s=null;try{s=JSON.parse(localStorage.getItem(KEY))}catch(e){}if(s&&s.guests){S=normalize(s)}else{seedState();normalize(S);this.push()}},
+  push(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}},logout(){}}}
+async function firebaseStore(cfg){
+  const V='10.12.2',B=`https://www.gstatic.com/firebasejs/${V}/`;
+  const[{initializeApp},A,F]=await Promise.all([import(B+'firebase-app.js'),import(B+'firebase-auth.js'),import(B+'firebase-firestore.js')]);
+  const app=initializeApp(cfg),auth=A.getAuth(app);let db;
+  try{db=F.initializeFirestore(app,{localCache:F.persistentLocalCache({tabManager:F.persistentMultipleTabManager()})})}catch(e){db=F.getFirestore(app)}
+  const base=['weddings',WEDDING_ID||'diogo-alessia'],DEV=(()=>{try{let d=localStorage.getItem('ad-dev');if(!d){d=newId('d');localStorage.setItem('ad-dev',d)}return d}catch(e){return newId('d')}})();
+  const col=k=>F.collection(db,...base,k),dref=(k,id)=>F.doc(db,...base,k,id);
+  const synced={guests:new Map(),tables:new Map(),els:new Map(),meta:null};let user=null,unsubs=[];
+  const metaOf=()=>({venue:S.venue,rules:S.rules,conflicts:S.conflicts.map(c=>c.join('|')),config:S.config,base:S.base||[]});
+  const strip=d=>{const{_by,_at,_dev,...r}=d;return r};
+  const st={who:null,
+    async start(){return new Promise(res=>{let started=false;
+      $('lf').onsubmit=async e=>{e.preventDefault();$('lerr').textContent='';try{await A.signInWithEmailAndPassword(auth,$('le').value.trim(),$('lp').value)}catch(err){$('lerr').textContent=err.code==='auth/invalid-credential'?'Email ou password errados':'Erro: '+err.code}};
+      $('lreset').onclick=async()=>{const em=$('le').value.trim();if(!em){$('lerr').textContent='Escreve o teu email primeiro';return}try{await A.sendPasswordResetEmail(auth,em);$('lerr').textContent='Enviámos um email para mudares a password.'}catch(err){$('lerr').textContent='Erro: '+err.code}};
+      A.onAuthStateChanged(auth,async u=>{user=u;unsubs.forEach(f=>f());unsubs=[];
+        if(!u){$('login').style.display='grid';return}$('login').style.display='none';st.who=u.email;
+        await st.listen();if(!started){started=true;res()}})})},
+    listen(){return new Promise(res=>{const got=new Set(),need=['guests','tables','els','meta'];let done=false,server=true;
+      const finish=async()=>{if(done)return;done=true;if(server&&!S.meta_exists&&!S.guests.length){await st.seedPrompt()}res()};
+      const first=(k,m)=>{if(m.fromCache&&navigator.onLine)return;if(m.fromCache)server=false;got.add(k);if(got.size===need.length)finish()};
+      setTimeout(()=>{if(!done){server=false;finish();toast('Ligação lenta — a mostrar dados guardados no telemóvel')}},10000);
+      S=S||normalize({});
+      ['guests','tables','els'].forEach(k=>unsubs.push(F.onSnapshot(col(k),{includeMetadataChanges:true},snap=>{
+        const ch=snap.docChanges().filter(c=>!c.doc.metadata.hasPendingWrites),others=ch.length;
+        const fromOther=ch.map(c=>c.doc.data()).filter(d=>d._dev&&d._dev!==DEV);if(got.has(k)&&fromOther.length)liveNote(fromOther[0]._by);
+        const cur=new Map(S[k].map(o=>[o.id,o]));
+        S[k]=snap.docs.map(d=>{const n=strip(d.data()),o=cur.get(n.id);if(o){Object.keys(o).forEach(key=>{if(!(key in n))delete o[key]});return Object.assign(o,n)}return n}).sort((a,b)=>(a.ord??0)-(b.ord??0));synced[k]=new Map(S[k].map(o=>[o.id,JSON.stringify(o)]));
+        setSync(snap.metadata);if(!got.has(k))first(k,snap.metadata);else if(others)remoteRender()},err=>fail(err))));
+      unsubs.push(F.onSnapshot(dref('meta','config'),{includeMetadataChanges:true},snap=>{const d=snap.data();S.meta_exists=snap.exists();
+        if(d){S.venue=d.venue;S.rules=d.rules;S.conflicts=(d.conflicts||[]).map(x=>x.split('|'));S.config={...structuredClone(DEF_CFG),...(d.config||{})};S.base=d.base||[];normalize(S);synced.meta=JSON.stringify(metaOf())}
+        setSync(snap.metadata);if(!got.has('meta'))first('meta',snap.metadata);else if(!snap.metadata.hasPendingWrites)remoteRender()},err=>fail(err)))})},
+    seedPrompt(){return new Promise(res=>{const has=(window.SRC_G||[]).length;$('modal').dataset.lock='1';
+      const done=note=>{st.push(note);$('modal').dataset.lock='';closeM();res()};
+      modal(`<h2>Bem-vinda/o!</h2><p>A base de dados está vazia. Escolhe o ficheiro <b>dados-iniciais.json</b> para carregar os convidados e o plano de mesas. Só é preciso fazer isto uma vez, num dos telemóveis.</p><input type="file" id="seedF" accept=".json,application/json" style="width:100%"><p id="seedE" style="color:var(--bad)"></p><div class="tools" style="margin-top:12px">${has?'<button class="rose" id="mOk">Usar dados incluídos na app</button>':''}<button id="mNo">Começar vazio</button></div>`,
+        ()=>{seedState();done('Carregou os dados iniciais do Excel')});
+      $('seedF').onchange=async e=>{try{const j=JSON.parse(await e.target.files[0].text());seedFrom(j);done('Carregou os dados iniciais ('+S.guests.length+' convidados)')}catch(_){$('seedE').textContent='Este ficheiro não é o dados-iniciais.json.'}};
+      $('mNo').onclick=()=>{S=normalize({});done('Começou um plano vazio')}})},
+    push(note){if(!user)return;const ops=[],lines=note?[note]:[];
+      ['guests','tables','els'].forEach(k=>{const cur=new Map(S[k].map(o=>[o.id,JSON.stringify(o)]));
+        cur.forEach((j,id)=>{const old=synced[k].get(id);if(old!==j){ops.push(['set',k,id,j]);if(!note)lines.push(...describe(k,old?JSON.parse(old):null,JSON.parse(j)));synced[k].set(id,j)}});
+        [...synced[k].keys()].forEach(id=>{if(!cur.has(id)){ops.push(['del',k,id]);if(!note)lines.push(...describe(k,JSON.parse(synced[k].get(id)),null));synced[k].delete(id)}})});
+      const mj=JSON.stringify(metaOf());if(mj!==synced.meta){ops.push(['set','meta','config',mj]);if(!note&&synced.meta)lines.push(...describe('meta',JSON.parse(synced.meta),JSON.parse(mj)));synced.meta=mj}
+      if(!ops.length)return;const stamp={_by:user.email,_dev:DEV,_at:F.serverTimestamp()};
+      for(let i=0;i<ops.length;i+=400){const b=F.writeBatch(db);ops.slice(i,i+400).forEach(([op,k,id,j])=>op==='del'?b.delete(dref(k,id)):b.set(dref(k,id),{...JSON.parse(j),...stamp}));
+        if(i===0&&lines.length)b.set(F.doc(col('log')),{...stamp,lines:[...new Set(lines)].slice(0,300)});
+        b.commit().catch(err=>{toast('Não consegui guardar: '+esc(err.code));setSync({hasPendingWrites:false,fromCache:true})})}
+      setSync({hasPendingWrites:true})},
+    async history(n){const q=F.query(col('log'),F.orderBy('_at','desc'),F.limit(n));const s=await F.getDocs(q);return s.docs.map(d=>{const x=d.data();return{at:x._at?.toMillis?.()||Date.now(),by:x._by,dev:x._dev,lines:x.lines||[]}})},
+    async whatChanged(){let seen=0;try{seen=+localStorage.getItem('ad-seen-'+WEDDING_ID)||0}catch(e){}const now=Date.now();
+      try{localStorage.setItem('ad-seen-'+WEDDING_ID,now)}catch(e){}if(!seen)return;
+      const q=F.query(col('log'),F.where('_at','>',F.Timestamp.fromMillis(seen)),F.orderBy('_at','asc'),F.limit(300));let s;try{s=await F.getDocs(q)}catch(e){return}
+      const items=s.docs.map(d=>d.data()).filter(x=>x._dev!==DEV).map(x=>({at:x._at?.toMillis?.()||now,by:x._by,lines:x.lines||[]}));if(!items.length)return;
+      const n=items.reduce((a,x)=>a+x.lines.length,0);
+      modal(`<h2>O que mudou</h2><p>${n} alteração(ões) desde que abriste a app neste dispositivo.</p><div class="log">${logHtml(items.slice().reverse())}</div><div class="tools" style="margin-top:12px"><button class="rose" id="mOk">Ok</button></div>`,closeM)},
+    logout(){A.signOut(auth);S=null;location.reload()}};
+  let lastNote=0;function liveNote(by){if(Date.now()-lastNote<6000)return;lastNote=Date.now();toast(`${esc(nameOf(by))} acabou de fazer alterações`)}
+  const markSeen=()=>{try{localStorage.setItem('ad-seen-'+WEDDING_ID,Date.now())}catch(e){}};
+  document.addEventListener('visibilitychange',()=>{if(!user)return;if(document.hidden)markSeen();else st.whatChanged()});
+  function setSync(m){const el=$('sync');if(!navigator.onLine||m.fromCache&&!m.hasPendingWrites&&!navigator.onLine){el.className='off';el.lastChild.textContent='offline';return}
+    if(m.hasPendingWrites){el.className='busy';el.lastChild.textContent='a guardar…'}else{el.className='ok';el.lastChild.textContent='sincronizado'}}
+  function fail(err){toast('Erro de sincronização: '+esc(err.code||err.message));if(err.code==='permission-denied')$('lerr').textContent='Esta conta não tem acesso. Confirma o teu email nas regras do Firestore.'}
+  addEventListener('online',()=>setSync({}));addEventListener('offline',()=>setSync({}));
+  return st}
+
+/* ================= boot ================= */
+(async()=>{
+  store=firebaseConfig&&firebaseConfig.apiKey?await firebaseStore(firebaseConfig).catch(e=>{toast('Sem ligação ao Firebase — modo local');return localStore()}):localStore();
+  await store.start();S=normalize(S);booted=true;renderAll();
+  let z=0;try{z=+localStorage.getItem('ad-zoom')}catch(e){}setZ(z||Math.max(mobile()?.55:.8,Math.min((hw.clientWidth-10)/hallW(),1)));
+  hw.scrollLeft=Math.max(0,(hallW()*zoom-hw.clientWidth)/2);
+  if(store.whatChanged)store.whatChanged();
+  if('serviceWorker'in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('sw.js').catch(()=>{});
+})();
+</script>
+</body>
+</html>

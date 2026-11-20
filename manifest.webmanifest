@@ -1,0 +1,17 @@
+{
+  "name": "Diogo & Alessia · Mesas",
+  "short_name": "Mesas A/D",
+  "description": "Plano de mesas, convidados e RSVP do casamento",
+  "lang": "pt-PT",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#2f2e2c",
+  "theme_color": "#2f2e2c",
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
